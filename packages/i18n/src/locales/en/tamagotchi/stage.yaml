@@ -58,7 +58,7 @@ docs:
   'microphone-settings': Microphone settings…
   'keep-on-top': Keep on top
   'settings': Settings…
-  'quit': Quit AIRI
+  'quit': Quit Hinata
   'sign-in': Sign in…
 
 'chat-window':
@@ -108,8 +108,8 @@ window:
   restore: Restore
   close: Close
   titles:
-    about: About AIRI
-    editor: AIRI Editor
+    about: About Hinata
+    editor: Hinata Editor
 
 notice:
   'fade-on-hover':
@@ -196,14 +196,14 @@ about:
     notices:
       admin-required:
         title: Administrator approval needed
-        description: AIRI is installed in a protected Windows folder. When you install the update, Windows can ask for administrator approval (UAC).
+        description: Hinata is installed in a protected Windows folder. When you install the update, Windows can ask for administrator approval (UAC).
         path: 'Install folder: {path}'
       downgrade-available:
         title: This update is an older version
-        description: The selected update lane offers an older build than your current version. If you install this update, AIRI goes back to the older version.
+        description: The selected update lane offers an older build than your current version. If you install this update, Hinata goes back to the older version.
       downgrade-downloaded:
         title: Older version downloaded
-        description: The package from the selected update lane is an older version. When AIRI restarts, it installs this older version.
+        description: The package from the selected update lane is an older version. When Hinata restarts, it installs this older version.
 computer-use-tool-call:
   help: Help
   status:

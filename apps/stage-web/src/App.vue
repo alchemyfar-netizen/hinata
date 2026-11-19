@@ -211,10 +211,13 @@ watch(() => router.currentRoute.value.meta.onboarding, (onboarding, previous) =>
   if (startupFinished.value && previous === false && onboarding !== false)
     openOnboardingAfterStartup()
 })
+
+// The site serves under a sub-path (GitHub Pages), so the logo path includes the base.
+const startupLogoSrc = `${import.meta.env.BASE_URL}favicon.svg`
 </script>
 
 <template>
-  <StartupOverlay logo-src="/favicon.svg" @finished="openOnboardingAfterStartup" @skip-model="continueWithoutModel">
+  <StartupOverlay :logo-src="startupLogoSrc" @finished="openOnboardingAfterStartup" @skip-model="continueWithoutModel">
     <StageTransitionGroup
       :primary-color="primaryColor"
       :secondary-color="secondaryColor"
