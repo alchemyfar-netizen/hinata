@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
       const [profiles, facts, recent] = await Promise.all([
         db(`hinata_profile?select=user_name,settings&${owner}`),
         db(`hinata_memories?select=fact&${owner}&order=created_at.asc&limit=200`),
-        db(`hinata_messages?select=role,content,created_at&${owner}&order=created_at.desc&limit=12`),
+        db(`hinata_messages?select=role,content,created_at&${owner}&order=id.desc&limit=12`),
       ])
       const settings = { ...(profiles[0]?.settings ?? {}) }
       delete settings.openrouterKey
