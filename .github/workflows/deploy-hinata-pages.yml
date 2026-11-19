@@ -1,0 +1,57 @@
+name: Hinata - GitHub Pages
+
+# Builds the customized web app (apps/stage-web) in the cloud and publishes it
+# to https://<owner>.github.io/<repo>/, so the laptop never runs the heavy build.
+
+on:
+  push:
+    branches: [hinata]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: hinata-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Cache turbo build setup
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@^26.12.1
+          cache: true
+          install: false
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:packages
+      - name: Build stage-web
+        run: pnpm -F @proj-airi/stage-web run build --base=/${{ github.event.repository.name }}/
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+      # GitHub Pages has no SPA fallback: serve the app for unknown paths too.
+      - run: cp apps/stage-web/dist/index.html apps/stage-web/dist/404.html
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: apps/stage-web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

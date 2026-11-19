@@ -51,8 +51,11 @@ export default defineConfig({
     exclude: [
       // Internal Packages
       '@proj-airi/stage-ui/*',
+      '@proj-airi/stage-ui-live2d/*',
+      '@proj-airi/stage-ui-three/*',
       '@proj-airi/drizzle-duckdb-wasm',
       '@proj-airi/drizzle-duckdb-wasm/*',
+      '@huggingface/transformers',
 
       // Static Assets: Models, Images, etc.
       'public/assets/*',
@@ -73,13 +76,7 @@ export default defineConfig({
       '@framework/utils/cubismdebug',
       '@framework/model/cubismmoc',
     ],
-    // NOTICE:
-    // Only workers import these packages, and the dependency scanner does not follow `new Worker(new URL(...))`.
-    // Vite then optimizes them when a worker first loads and reloads the page, which stops a voice enrollment.
-    // Source: Vite's `vite:dep-scan` plugin.
-    // Remove when the scanner follows worker entries.
     include: [
-      '@huggingface/transformers',
       '@moeru/eventa/adapters/webworkers/worker',
     ],
   },
@@ -88,6 +85,8 @@ export default defineConfig({
       '@proj-airi/server-sdk': resolve(join(import.meta.dirname, '..', '..', 'packages', 'server-sdk', 'src')),
       '@proj-airi/i18n': resolve(join(import.meta.dirname, '..', '..', 'packages', 'i18n', 'src')),
       '@proj-airi/stage-ui': resolve(join(import.meta.dirname, '..', '..', 'packages', 'stage-ui', 'src')),
+      '@proj-airi/stage-ui-live2d': resolve(join(import.meta.dirname, '..', '..', 'packages', 'stage-ui-live2d', 'src')),
+      '@proj-airi/stage-ui-three': resolve(join(import.meta.dirname, '..', '..', 'packages', 'stage-ui-three', 'src')),
       '@proj-airi/stage-pages': resolve(join(import.meta.dirname, '..', '..', 'packages', 'stage-pages', 'src')),
       '@proj-airi/stage-shared': resolve(join(import.meta.dirname, '..', '..', 'packages', 'stage-shared', 'src')),
       '@proj-airi/stage-layouts': resolve(join(import.meta.dirname, '..', '..', 'packages', 'stage-layouts', 'src')),
@@ -218,25 +217,25 @@ export default defineConfig({
             short_name: 'AIRI',
             icons: [
               {
-                src: '/web-app-manifest-192x192.png',
+                src: 'web-app-manifest-192x192.png',
                 sizes: '192x192',
                 type: 'image/png',
               },
               {
-                src: '/web-app-manifest-512x512.png',
+                src: 'web-app-manifest-512x512.png',
                 sizes: '512x512',
                 type: 'image/png',
               },
               {
                 purpose: 'maskable',
                 sizes: '192x192',
-                src: '/maskable_icon_x192.png',
+                src: 'maskable_icon_x192.png',
                 type: 'image/png',
               },
               {
                 purpose: 'maskable',
                 sizes: '512x512',
-                src: '/maskable_icon_x512.png',
+                src: 'maskable_icon_x512.png',
                 type: 'image/png',
               },
             ],
