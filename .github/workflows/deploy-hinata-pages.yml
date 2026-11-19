@@ -34,7 +34,11 @@ jobs:
           runtime: node@^26.12.1
           cache: true
           install: false
+      # onnxruntime-node fetches CUDA binaries on Linux from a link that 404s. The web build does not use them.
       - run: pnpm install --frozen-lockfile
+        env:
+          ONNXRUNTIME_NODE_INSTALL_CUDA: skip
+          ONNXRUNTIME_NODE_INSTALL: skip
       - run: pnpm run build:packages
       - name: Build stage-web
         run: pnpm -F @proj-airi/stage-web run build --base=/${{ github.event.repository.name }}/

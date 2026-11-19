@@ -26,6 +26,7 @@ import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 
 import { DEFAULT_ARTISTRY_WIDGET_SPAWNING_PROMPT } from '../../constants/prompts/character-defaults'
+import { HINATA_CHARACTER_NAME, HINATA_PERSONA_PROMPT } from '../../constants/prompts/hinata'
 import { formatLive2DActPrompt } from '../../constants/prompts/live2d-act'
 import { documentSyncRepo } from '../../database/repos/document-sync.repo'
 import { authedFetch } from '../../libs/auth-fetch'
@@ -778,9 +779,9 @@ export const useAiriCardStore = defineStore('airi-card', () => {
    * find the edits of the user.
    */
   const builtInCard = computed(() => newAiriCard({
-    name: 'Iru',
+    name: HINATA_CHARACTER_NAME,
     version: '1.0.0',
-    description: t('base.prompt.prefix'),
+    description: HINATA_PERSONA_PROMPT,
     extensions: {
       airi: {
         // Every device ships the preset model, so this reference is part of the

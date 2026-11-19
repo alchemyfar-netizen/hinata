@@ -11,8 +11,8 @@ animations:
 dialogs:
   onboarding:
     official:
-      title: AIRI Official Provider
-    title: Welcome to AIRI!
+      title: Hinata Official Provider
+    title: Welcome to Hinata!
     description: Let's set up your first AI provider to get started.
     selectProvider: Choose an AI Provider
     configureProvider: Configure {provider}
@@ -38,18 +38,18 @@ dialogs:
     retry: Retry
     credentialsSafeLabel: Keep your API keys and credentials safe!
     credentialsSafeLocal: >-
-      AIRI is running pure locally in your PC, and we will never steal your
+      Hinata is running pure locally in your PC, and we will never steal your
       credentials for AI / LLM providers. But keep in mind that your API keys
       are sensitive information. Make sure to keep them safe and do not share
       them with anyone.
     credentialsSafeOpenSource: >-
-      AIRI is open sourced at {github}, if you want to check how we handle your
+      Hinata is open sourced at {github}, if you want to check how we handle your
       credentials, feel free to inspect our code.
     enableChatCheck: >-
       Allow airi to send a "ping" message to the first available chat model to
       check availability
     start: Let's do it!
-    loginPrompt: Sign in to use the official AIRI provider for the best experience.
+    loginPrompt: Sign in to use the official Hinata provider for the best experience.
     loginAction: Sign in
     setupWithoutSigningIn: Setup with your provider
     pricingLink: Pricing
@@ -67,15 +67,15 @@ dialogs:
       notificationsTitle: Notifications
       notificationsDescription: Allow reminders and important status updates.
       microphoneTitle: Microphone
-      microphoneDescription: Allow AIRI to use your microphone for voice input and transcription.
+      microphoneDescription: Allow Hinata to use your microphone for voice input and transcription.
       accessibilityTitle: Accessibility
       accessibilityDescription: Lets the Push to Talk shortcut work while another app is in front.
       screenRecordingTitle: Screen Recording
-      screenRecordingDescription: Lets AIRI see your screen when you ask it to look.
+      screenRecordingDescription: Lets Hinata see your screen when you ask it to look.
       pushToTalkTitle: Push to Talk
-      pushToTalkDescription: Hold a key to talk while AIRI is in front.
+      pushToTalkDescription: Hold a key to talk while Hinata is in front.
       screenShareTitle: Screen sharing
-      screenShareDescription: Lets AIRI see a screen or window that you share.
+      screenShareDescription: Lets Hinata see a screen or window that you share.
       requestAction: Request access
       openSettingsAction: Open System Settings
       optionalHint: You can continue even if these permissions are not granted.
@@ -117,20 +117,20 @@ dialogs:
           with: With Accessibility
           withBody: The shortcut works in every app.
           without: Without it
-          withoutBody: It works only while AIRI is in front.
+          withoutBody: It works only while Hinata is in front.
           try: Hold the keys to try.
           listening: Listening
           worksEverywhere: It works. Try it in another app too.
           worksHere: It works here. Other apps need Accessibility.
-          location: Turn on AIRI in Privacy & Security › Accessibility.
+          location: Turn on Hinata in Privacy & Security › Accessibility.
           on: The shortcut works in every app.
-          off: The shortcut works only while AIRI is in front.
+          off: The shortcut works only while Hinata is in front.
         push-to-talk:
           title: Hold a key to talk
-          body: Hold the key while AIRI is in front, speak, and let go.
+          body: Hold the key while Hinata is in front, speak, and let go.
           try: Hold the key to try.
-          works: It works. Hold it whenever AIRI is in front.
-          on: Hold the key while AIRI is in front to talk.
+          works: It works. Hold it whenever Hinata is in front.
+          on: Hold the key while Hinata is in front to talk.
           off: You can still talk with the microphone button.
         screen-recording:
           title: Let your character see your screen
@@ -140,7 +140,7 @@ dialogs:
           hidden: Hidden from your character
           display: Display
           previewOf: 'Preview of {screen}'
-          location: Turn on AIRI in Privacy & Security › Screen Recording.
+          location: Turn on Hinata in Privacy & Security › Screen Recording.
           on: Your character sees your screen when you ask.
           off: Your character cannot see your screen.
         notifications:
@@ -159,7 +159,7 @@ dialogs:
           setUpOne: 'Set up {permission}'
     voiceprint:
       title: Let your character know your voice
-      body: Talk for about {seconds} seconds in a quiet place. AIRI keeps only your voiceprint on this device, not the recording.
+      body: Talk for about {seconds} seconds in a quiet place. Hinata keeps only your voiceprint on this device, not the recording.
       count: '{seconds} of {target} s'
       cue:
         start: Start talking
@@ -172,8 +172,8 @@ dialogs:
       label: 'Label of voiceprint {index}'
       more: 'You can enroll more voiceprints later in {path}.'
       on: Your voiceprint is saved on this device.
-      off: AIRI cannot recognize your voice.
-      speakerRecognition: AIRI checks if a voice input sounds like you. Other people can still talk to AIRI.
+      off: Hinata cannot recognize your voice.
+      speakerRecognition: Hinata checks if a voice input sounds like you. Other people can still talk to Hinata.
   bug-report:
     title: Bug report (´;ω;`)ヾ(･∀･`)
     subtitle: Oops, sorry we made something wrong. Would you mind telling us what
@@ -207,7 +207,7 @@ analytics:
   notice:
     title: Usage analytics
     description: >-
-      AIRI collects anonymous usage analytics and error reports to help us
+      Hinata collects anonymous usage analytics and error reports to help us
       understand how the app is used and fix crashes. No personal data is collected.
     privacyPrefix: Read the
     privacyLink: privacy policy
@@ -305,7 +305,7 @@ live2d:
     title: Extract colors from model
     description: >
       Extract prominent colors from current rendering canvas.
-      Click on the color to apply it to AIRI.
+      Click on the color to apply it to Hinata.
       Try to extract multiple times, with the model in different poses,
       if the colors are not desirable.
     button-extract:
@@ -314,7 +314,7 @@ live2d:
     title: Animation
     motion-driver:
       title: Motion driver
-      description: Select how AIRI creates idle body and eye motion.
+      description: Select how Hinata creates idle body and eye motion.
       options:
         universal:
           title: Universal
@@ -325,13 +325,13 @@ live2d:
       magic:
         idle-profile:
           title: Idle profile
-          description: Select the motion dataset that MAGIC plays while AIRI does not speak.
+          description: Select the motion dataset that MAGIC plays while Hinata does not speak.
         speaking-profile:
           title: Speaking profile
-          description: Select the motion dataset that MAGIC plays while AIRI replies.
+          description: Select the motion dataset that MAGIC plays while Hinata replies.
         follow-speech:
           title: Follow speech
-          description: Blend to the speaking profile while the voice of AIRI plays. Blend back to the idle profile after the voice stops.
+          description: Blend to the speaking profile while the voice of Hinata plays. Blend back to the idle profile after the voice stops.
         profile:
           options:
             idle-calm:
@@ -364,7 +364,7 @@ live2d:
       description: Force blinking animation with external timer
     blink-mode:
       title: Blink mode
-      description: Choose the model built-in blink or AIRI's forced blink timer.
+      description: Choose the model built-in blink or Hinata's forced blink timer.
     idle-motion:
       title: Idle animation
       no-motion: No animation available
@@ -385,7 +385,7 @@ live2d:
   clear-model-cache: Clear model cache
   expressions:
     title: Expressions
-    description: Activate an Expression temporarily or choose whether AIRI can use it.
+    description: Activate an Expression temporarily or choose whether Hinata can use it.
     override-toggle: Expression system
     sdk-preset-preserved-notice: >
       SDK expression manager and eye blink are preserved when disabled.
@@ -395,8 +395,8 @@ live2d:
     actions:
       activate: 'Activate {name}'
       deactivate: 'Deactivate {name}'
-      show-to-airi: 'Make {name} available to AIRI'
-      hide-from-airi: 'Hide {name} from AIRI'
+      show-to-airi: 'Make {name} available to Hinata'
+      hide-from-airi: 'Hide {name} from Hinata'
 microphone: Microphone
 models: Model
 pages:
@@ -427,7 +427,7 @@ pages:
     connections:
       tab: Connected accounts
       title: Connected accounts
-      description: Sign in to AIRI through these providers. Unlink to revoke access, then link again to switch to a different account.
+      description: Sign in to Hinata through these providers. Unlink to revoke access, then link again to switch to a different account.
       status:
         linked: Linked
         notLinked: Not linked
@@ -445,7 +445,7 @@ pages:
         listFailed: Could not load connected accounts.
         unlinkFailed: Could not unlink this account.
         linkFailed: Could not start the link flow.
-        accountAlreadyLinkedToDifferentUser: This OAuth account is already linked to another AIRI account. Choose a different provider account, or unlink it from the other AIRI account first.
+        accountAlreadyLinkedToDifferentUser: This OAuth account is already linked to another Hinata account. Choose a different provider account, or unlink it from the other Hinata account first.
         oauthCallbackFailed: We could not connect this OAuth account. Try again or choose another provider account.
         lastAccount: This is your only sign-in method. Set a password first before unlinking it.
         reauthenticate: Sign in again before you link or unlink an account.
@@ -531,7 +531,7 @@ pages:
         pending: Waiting to upload
         refused: Not uploaded. Your account has no room for more characters, so this character stays on this device.
       conflict_copy_name: '{name} (conflict copy)'
-      conflict_notice: Another device changed the same character. AIRI kept the version from this device as a copy.
+      conflict_notice: Another device changed the same character. Hinata kept the version from this device as a copy.
       history:
         tab: History
         empty: No history yet for this character.
@@ -725,13 +725,13 @@ pages:
     import_missing_file: Card package is missing required files
     import_invalid_file: Card package file is invalid
     upload: Upload
-    upload_desc: Click or drag an AIRI card package to import
+    upload_desc: Click or drag an Hinata card package to import
   memory:
     description: Where memories got stored, and organized
     title: Memory
   data:
     title: Data
-    description: Manage stored AIRI data, exports, and resets
+    description: Manage stored Hinata data, exports, and resets
     actions:
       export: Export
       import: Import
@@ -778,11 +778,11 @@ pages:
         delete: Delete all data
       desktop-folder:
         title: Open app data folder
-        description: Open AIRI's data folder in your file manager.
+        description: Open Hinata's data folder in your file manager.
         open: Open folder
       desktop:
         title: Reset desktop settings & states
-        description: Clear AIRI desktop settings and runtime state.
+        description: Clear Hinata desktop settings and runtime state.
         center: Move desktop window to center
         reset: Reset desktop data
     confirmations:
@@ -842,7 +842,7 @@ pages:
         blink-options:
           off: 'Off'
           model: From the model
-          airi: AIRI timer
+          airi: Hinata timer
       reset: Reset
       back: Back
       clear-cache-confirm:
@@ -938,7 +938,7 @@ pages:
           name: Nano Banana (Preview)
           description: Use Google AI Studio for image preview and reactions.
       card:
-        description: Configure how AIRI generates images and visual content.
+        description: Configure how Hinata generates images and visual content.
         comfyui_empty: No ComfyUI workflows configured. Go to Settings → Providers → ComfyUI to upload a workflow template.
         exposed_fields: '{count} exposed fields'
         open_on_replicate: Open on Replicate
@@ -1023,14 +1023,14 @@ pages:
             thinking:
               label: Thinking
               required-description: This model requires Thinking.
-              provider-default-description: AIRI has no reasoning settings for this model. OpenRouter applies its default.
+              provider-default-description: Hinata has no reasoning settings for this model. OpenRouter applies its default.
       title: Consciousness
     description: Thinking, vision, speech synthesis, gaming, etc.
     gaming-factorio:
       description: Playing Factorio!
       title: Factorio
       enable: Enable Factorio Integration
-      enable-description: Allow AIRI to interact with Factorio game
+      enable-description: Allow Hinata to interact with Factorio game
       server-address: Server Address
       server-address-description: The IP address or hostname of the Factorio server
       server-address-placeholder: Enter server address (e.g., localhost or 192.168.1.100)
@@ -1100,10 +1100,10 @@ pages:
           unresolved: No character answers this pronunciation.
       voiceprint:
         title: Voiceprint
-        description: Enroll your voice, so that AIRI can recognize it.
+        description: Enroll your voice, so that Hinata can recognize it.
         intro: A voiceprint is a list of numbers that the voiceprint model computes from speech. It contains no audio, but it can identify the person who spoke.
         languages: A voiceprint matches speech in the language of its enrollment best. If you speak several languages, enroll one voiceprint for each. A label helps you tell them apart, for example a language, a microphone, or a person.
-        privacy: AIRI does not keep the recordings of an enrollment. It keeps voiceprints only on this device. Card export does not include them, and AIRI does not upload them. To delete one, use Delete on this page. To delete all of them, use Delete all data in Data settings.
+        privacy: Hinata does not keep the recordings of an enrollment. It keeps voiceprints only on this device. Card export does not include them, and Hinata does not upload them. To delete one, use Delete on this page. To delete all of them, use Delete all data in Data settings.
         download: The first enrollment downloads the voiceprint model, about 28 MB.
         saved: Saved voiceprints
         label: Label
@@ -1111,7 +1111,7 @@ pages:
         enabled: Use for speaker recognition
         speaker-recognition:
           label: Speaker recognition
-          description: Compares each voice input that speech or a wake word starts with each voiceprint that has Use for speaker recognition on. The IO trace of the input records the highest score and its voiceprint. Push to Talk inputs get no score. Every voice can still start an input, and the chat model does not receive the score. While AIRI listens, the voiceprint model stays in memory.
+          description: Compares each voice input that speech or a wake word starts with each voiceprint that has Use for speaker recognition on. The IO trace of the input records the highest score and its voiceprint. Push to Talk inputs get no score. Every voice can still start an input, and the chat model does not receive the score. While Hinata listens, the voiceprint model stays in memory.
           needs-voiceprint: To use speaker recognition, enroll a voiceprint and turn on Use for speaker recognition for it.
         status:
           none: You have no voiceprint.
@@ -1119,7 +1119,7 @@ pages:
           outdated: The voiceprint model changed. Enroll again to use this voiceprint.
         instructions: Stay alone near the microphone. Click Start recording, then talk in your usual voice.
         sample-prompt: 'Not sure what to say? Read this:'
-        sample: Today I want to check the weather, read my messages, and plan the rest of my day. I usually talk to AIRI in the evening, when the room is quiet and I have some free time. Please remember my voice, so that you can tell when I am the one who speaks.
+        sample: Today I want to check the weather, read my messages, and plan the rest of my day. I usually talk to Hinata in the evening, when the room is quiet and I have some free time. Please remember my voice, so that you can tell when I am the one who speaks.
         progress: '{seconds} s of speech. Enrollment needs at least {min} s.'
         start: Start recording
         again: Enroll another voiceprint
@@ -1146,18 +1146,18 @@ pages:
             error: The microphone is not available
           microphone-switch:
             label: Use microphone
-            description: When this is off, no feature in AIRI can use the microphone.
+            description: When this is off, no feature in Hinata can use the microphone.
           listen:
             label: Listen
-            description: AIRI listens in the input mode above. This needs the microphone.
+            description: Hinata listens in the input mode above. This needs the microphone.
           input-device:
             label: Input device
-            description: Select the microphone that AIRI uses.
+            description: Select the microphone that Hinata uses.
             playground-description: Hearing and the playground use this microphone.
             placeholder: Select a microphone
             system-default: System default
             allow: Allow microphone access
-            allow-description: AIRI lists your microphones after you allow access.
+            allow-description: Hinata lists your microphones after you allow access.
             allow-action: Allow
             blocked: The browser blocked the microphone
             blocked-description: Allow the microphone for this site in the browser site settings, then try again.
@@ -1165,26 +1165,26 @@ pages:
             missing: No microphone found. Connect one, then open this page again.
           auto-send:
             title: Transcripts
-            description: Choose what AIRI does with the text of your speech.
+            description: Choose what Hinata does with the text of your speech.
             label: Send automatically
-            label-description: AIRI sends the transcript to chat after a delay. Turn this off to read and edit the text first. Each sent message uses tokens.
+            label-description: Hinata sends the transcript to chat after a delay. Turn this off to read and edit the text first. Each sent message uses tokens.
             delay: Send delay
-            delay-description: The time that AIRI waits before it sends the transcript.
+            delay-description: The time that Hinata waits before it sends the transcript.
             immediate: Immediately
           input-mode:
             title: Input mode
-            description: Choose how AIRI starts to listen while the microphone is on.
+            description: Choose how Hinata starts to listen while the microphone is on.
             label: Start listening
-            call-only: On a small screen, AIRI listens only during a voice call. To start one, use the add button next to the chat input.
+            call-only: On a small screen, Hinata listens only during a voice call. To start one, use the add button next to the chat input.
             always-on: Always on
-            always-on-description: AIRI listens all the time and replies when you speak.
+            always-on-description: Hinata listens all the time and replies when you speak.
             push-to-talk: Push to Talk
-            push-to-talk-description: AIRI listens only while you hold the Push to Talk key. The microphone is open only during the hold.
+            push-to-talk-description: Hinata listens only while you hold the Push to Talk key. The microphone is open only during the hold.
             push-to-talk-unavailable: Not available here. This app has no Push to Talk key on this device.
             stranded-title: Push to Talk is not available here
-            stranded-description: This app has no Push to Talk key on this device, so AIRI does not listen. To talk to AIRI here, choose Always on or Wake words.
+            stranded-description: This app has no Push to Talk key on this device, so Hinata does not listen. To talk to Hinata here, choose Always on or Wake words.
             wake-word: Wake words
-            wake-word-description: The microphone stays on, but AIRI listens only after you say a character's wake word.
+            wake-word-description: The microphone stays on, but Hinata listens only after you say a character's wake word.
             wake-word-status:
               no-words: No character has wake words. Ask a character in chat to set its wake words.
               unconfigured: Wake word detection starts when the microphone is on.
@@ -1193,9 +1193,9 @@ pages:
               error: 'The wake word model is not available: {error}'
           end-judge:
             title: End of speech
-            description: After you pause, a chat model reads the transcript and decides if you finished. If you did not finish, AIRI waits 3 more seconds for you to continue.
+            description: After you pause, a chat model reads the transcript and decides if you finished. If you did not finish, Hinata waits 3 more seconds for you to continue.
             enabled: Check if I finished speaking
-            enabled-description: The transcript of each pause is sent to the rewrite model. When this is off, AIRI ends your speech after a short pause.
+            enabled-description: The transcript of each pause is sent to the rewrite model. When this is off, Hinata ends your speech after a short pause.
           rephrase:
             title: Transcript rewrite
             description: A chat model fixes recognition errors and removes filler words before a transcript becomes a draft. The original text is kept.
@@ -1328,7 +1328,7 @@ pages:
       description: Chat & voice chat over Discord
       title: Discord
       enable: Enable Discord Integration
-      enable-description: Allow AIRI to interact through Discord
+      enable-description: Allow Hinata to interact through Discord
       token: Bot Token
       token-description: Your Discord bot token
       token-placeholder: Enter your Discord bot token
@@ -1416,7 +1416,7 @@ pages:
       description: X / Twitter browsing and usage
       title: X / Twitter
       enable: Enable X / Twitter Integration
-      enable-description: Allow AIRI to interact with X / Twitter
+      enable-description: Allow Hinata to interact with X / Twitter
       api-key: API Key
       api-key-description: Your X / Twitter API key
       api-key-placeholder: Enter your X / Twitter API key
@@ -1500,9 +1500,9 @@ pages:
         airi-disagree: No thanks
     home-assistant:
       title: Home Assistant
-      description: Let AIRI read and control your Home Assistant devices.
+      description: Let Hinata read and control your Home Assistant devices.
       enable: Enable Home Assistant
-      enable-description: Allow AIRI to read and control your devices
+      enable-description: Allow Hinata to read and control your devices
       base-url:
         label: Address
         placeholder: http://homeassistant.local:8123
@@ -1530,15 +1530,15 @@ pages:
         failed-policy-rollback: The save was refused. The device list did not reach the window that runs the tools, so the model reaches no device. Try again.
       access:
         label: Device access
-        description: Choose which devices AIRI reads and controls.
+        description: Choose which devices Hinata reads and controls.
         mode-all: Every device
         mode-allow: Allow list
         mode-deny: Block list
-        all-hint: AIRI reaches every device. Pick a list to limit it.
+        all-hint: Hinata reaches every device. Pick a list to limit it.
         rule-allow: Only the devices you select are reachable.
         rule-deny: Every device except the ones you select is reachable.
         selected-count: '{count} selected'
-        empty-warning: Pick at least one device. AIRI reaches nothing until you do.
+        empty-warning: Pick at least one device. Hinata reaches nothing until you do.
         search: Search devices
         reload: Reload devices
         loading: Loading devices...
@@ -1696,9 +1696,9 @@ pages:
       deleted: 'Deleted the template of {name}. The chat makes a new one at the next call of the tool, or when you unfold one of its calls.'
     web-search:
       title: Web Search
-      description: Let AIRI search the web for current information
+      description: Let Hinata search the web for current information
       enable: Enable Web Search
-      enable-description: Allow AIRI to search the web during chat
+      enable-description: Allow Hinata to search the web during chat
       provider: Search provider
       deepseek:
         api-key: DeepSeek API Key
@@ -1710,7 +1710,7 @@ pages:
       configured: Web search is ready to use!
     mcp-server:
       title: MCP servers
-      description: Configure MCP servers and bring their tools into AIRI.
+      description: Configure MCP servers and bring their tools into Hinata.
       config-path: Config file
       runtime-title: Runtime status
       empty: No MCP servers yet — click "Add server" below to create one, or paste a config via "Edit JSON".
@@ -1750,7 +1750,7 @@ pages:
           placeholder: e.g. filesystem
         transport:
           label: Type
-          description: How AIRI reaches this server.
+          description: How Hinata reaches this server.
           stdio: Local process
           http: Remote URL
         url:
@@ -1787,7 +1787,7 @@ pages:
         placeholder: Paste mcp.json here…
       test:
         title: Test connection
-        description: AIRI connects briefly to the server and lists the tools it exposes.
+        description: Hinata connects briefly to the server and lists the tools it exposes.
         pick-server-label: Server
         no-servers: Nothing to test yet
         no-server-selected: Pick a server first.
@@ -2047,9 +2047,9 @@ pages:
     helpinfo:
       title: First time here?
       description: >
-        AIRI requires at least one {chat} provider to be configured to think,
+        Hinata requires at least one {chat} provider to be configured to think,
         and behave properly. You could think of it as the brain of the
-        characters living in AIRI system.
+        characters living in Hinata system.
     explained:
       chat: Text generation model providers. e.g. OpenRouter, OpenAI, Ollama.
       Speech: Speech (text-to-speech) model providers. e.g. ElevenLabs, Azure Speech.
@@ -2071,7 +2071,7 @@ pages:
         asset:
           title: Model files
           unknown: Checking files...
-          bundled: Included with AIRI
+          bundled: Included with Hinata
           installed: Stored on this device
           missing: Download when used
           downloading: Downloading...
@@ -2216,7 +2216,7 @@ pages:
               placeholder: http://localhost:8188
           cors:
             title: CORS Block Detected
-            description: ComfyUI blocks requests from other applications by default. To allow AIRI to connect, you must start ComfyUI with the `--enable-cors-header "*"` flag.
+            description: ComfyUI blocks requests from other applications by default. To allow Hinata to connect, you must start ComfyUI with the `--enable-cors-header "*"` flag.
             command: python main.py --enable-cors-header "*"
           workflows:
             title: Workflow Templates
@@ -2525,13 +2525,13 @@ pages:
         title: Prompt API
       official:
         title: Official Provider
-        description: Official AI provider by AIRI.
+        description: Official AI provider by Hinata.
         speech-title: Official Speech Provider
-        speech-description: Official text-to-speech provider by AIRI.
+        speech-description: Official text-to-speech provider by Hinata.
         speech-streaming-title: Official Streaming Speech Provider
-        speech-streaming-description: Official low-latency text-to-speech provider by AIRI (bidirectional WebSocket).
+        speech-streaming-description: Official low-latency text-to-speech provider by Hinata (bidirectional WebSocket).
         transcription-title: Official Transcription Provider
-        transcription-description: Official speech-to-text provider by AIRI.
+        transcription-description: Official speech-to-text provider by Hinata.
       transcriptions:
         playground:
           title: Transcription Playground
@@ -2552,7 +2552,7 @@ pages:
     server-auth-token:
       label: Pairing Token
       description: >-
-        Other devices use this token to pair with this server. AIRI generates a
+        Other devices use this token to pair with this server. Hinata generates a
         token when this field is empty.
       placeholder: Auto-generate
     qr:
@@ -2561,7 +2561,7 @@ pages:
         Scan this QR code with the mobile app. The app tries each local address
         and saves the first working address.
       refresh: Refresh
-      image-alt: AIRI pairing QR code
+      image-alt: Hinata pairing QR code
       candidates: Candidate addresses
       token-hint: >-
         The QR code includes the pairing token. Do not share the QR code
@@ -2572,7 +2572,7 @@ pages:
     qr-scan:
       title: Quick Connect
       description: Scan the QR code from Tamagotchi to quick connect
-      instructions: Point the camera at the AIRI connection QR code.
+      instructions: Point the camera at the Hinata connection QR code.
       action: Scan
       success:
         title: Connected address saved
@@ -2767,8 +2767,8 @@ pages:
           presets:
             default:
               colors:
-                color-1: AIRI Green
-              description: The default greenish theme color, brought by AIRI to you!
+                color-1: Hinata Green
+              description: The default greenish theme color, brought by Hinata to you!
               title: Default Color
             morandi:
               colors:
@@ -3051,7 +3051,7 @@ tachie:
 websocket-secure-enabled:
   title: Serve as Secure WebSocket (WSS)
   description: >-
-    Use WSS for secure mobile connections. AIRI creates a self-signed
+    Use WSS for secure mobile connections. Hinata creates a self-signed
     certificate.
 wip:
   title: Work in Progress
