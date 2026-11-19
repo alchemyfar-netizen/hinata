@@ -92,8 +92,18 @@ function applySettings(state: HinataState | undefined) {
       configuredBy: 'user',
     }
   }
+  // Hearing: the browser's own speech recognition (Chrome on Android and on the PC). Free, no key needed.
+  const webSpeech = 'browser-web-speech-api'
+  providers[webSpeech] = {
+    ...providers[webSpeech],
+    id: webSpeech,
+    definitionId: webSpeech,
+    config: { language: 'en-IN', continuous: true, interimResults: true, maxAlternatives: 1, ...providers[webSpeech]?.config },
+    status: 'configured',
+    configuredBy: 'user',
+  }
   localStorage.setItem(PROVIDERS_KEY, JSON.stringify(providers))
-  localStorage.setItem(ADDED_KEY, JSON.stringify({ ...readJson(ADDED_KEY, {}), 'openrouter-ai': true, 'openrouter-audio-speech': true }))
+  localStorage.setItem(ADDED_KEY, JSON.stringify({ ...readJson(ADDED_KEY, {}), 'openrouter-ai': true, 'openrouter-audio-speech': true, [webSpeech]: true }))
 
   // The brain.
   setIfEmpty('settings/consciousness/active-provider', 'openrouter-ai')
@@ -103,6 +113,16 @@ function applySettings(state: HinataState | undefined) {
   setIfEmpty('settings/speech/active-provider', 'openrouter-audio-speech', ['', 'speech-noop'])
   setIfEmpty('settings/speech/active-model', settings.speechModel || 'openai/gpt-audio-mini')
   setIfEmpty('settings/speech/voice', settings.speechVoice || 'shimmer')
+  localStorage.setItem('settings/speech/enabled', 'true')
+
+  // Hearing defaults, applied once per device: what you say is sent by itself after a short pause.
+  setIfEmpty('settings/hearing/active-provider', webSpeech)
+  if (localStorage.getItem('hinata/hearing-version') !== '1') {
+    localStorage.setItem('settings/hearing/enabled', 'true')
+    localStorage.setItem('settings/hearing/auto-send-enabled', 'true')
+    localStorage.setItem('settings/hearing/auto-send-delay', '1200')
+    localStorage.setItem('hinata/hearing-version', '1')
+  }
 }
 
 function markSetupDone() {

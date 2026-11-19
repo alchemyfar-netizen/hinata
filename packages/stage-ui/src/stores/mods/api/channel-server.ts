@@ -114,6 +114,9 @@ export const useModsServerChannelStore = defineStore('mods:channels:proj-airi:se
       token: options?.token ?? (websocketAuthToken.value || undefined),
       url: websocketUrl.value || defaultWebSocketUrl,
     }
+    // Hinata on the web has no local mods server: a hosted page never retries ws://localhost forever.
+    if (isLocalServerUrl(requestedConnection.url) && typeof location !== 'undefined' && !isLocalServerUrl(location.href))
+      return Promise.resolve()
     const isSameConnection = connectionIdentity?.url === requestedConnection.url
       && connectionIdentity.token === requestedConnection.token
 
@@ -398,3 +401,12 @@ export const useModsServerChannelStore = defineStore('mods:channels:proj-airi:se
     dispose,
   }
 })
+
+function isLocalServerUrl(url: string) {
+  try {
+    return ['localhost', '127.0.0.1', '[::1]'].includes(new URL(url).hostname)
+  }
+  catch {
+    return false
+  }
+}

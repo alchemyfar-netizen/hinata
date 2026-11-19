@@ -9,7 +9,6 @@ import { useCharacterOrchestratorStore } from '@proj-airi/stage-ui/stores/charac
 import { useChatStore } from '@proj-airi/stage-ui/stores/chat'
 import { useDevicePermissionsStore } from '@proj-airi/stage-ui/stores/device-permissions'
 import { useDisplayModelsStore } from '@proj-airi/stage-ui/stores/display-models'
-import { useModsServerChannelStore } from '@proj-airi/stage-ui/stores/mods/api/channel-server'
 import { useContextBridgeStore } from '@proj-airi/stage-ui/stores/mods/api/context-bridge'
 import { useAiriCardStore } from '@proj-airi/stage-ui/stores/modules/airi-card'
 import { useArtistryStore } from '@proj-airi/stage-ui/stores/modules/artistry'
@@ -49,7 +48,6 @@ const onboardingStore = useOnboardingStore()
 useDevicePermissionsStore().register(useDevicePermissions())
 const chatStore = useChatStore()
 const syncedPinia = usePiniaSynced()
-const serverChannelStore = useModsServerChannelStore()
 const characterOrchestratorStore = useCharacterOrchestratorStore()
 const settingsAudioDeviceStore = useSettingsAudioDevice()
 const { showingSetup } = storeToRefs(onboardingStore)
@@ -151,7 +149,7 @@ async function loadStartup() {
     })
     await startup.run('chat', () => chatStore.initialize(syncedPinia))
     await startup.run('services', () => {
-      void serverChannelStore.initialize({ possibleEvents: ['ui:configure'] }).catch(error => console.error('Mods server initialization failed:', error))
+      // Hinata runs without the local mods server (ws://localhost:6121), so it is not connected.
       contextBridgeStore.initialize()
       characterOrchestratorStore.initialize(syncedPinia)
     })
