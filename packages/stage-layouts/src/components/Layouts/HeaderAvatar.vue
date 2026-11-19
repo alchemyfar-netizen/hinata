@@ -184,7 +184,7 @@ const notificationsLabel = computed(() => unread.value > 0
         </template>
 
         <template v-else>
-          <DropdownMenuItem as-child>
+          <DropdownMenuItem v-if="false" as-child>
             <button
               :class="[
                 'group w-full flex cursor-pointer select-none items-center gap-3 rounded-lg px-3 py-2',

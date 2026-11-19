@@ -147,7 +147,7 @@ const characterVoiceIcon = computed(() => {
       </BasicButton>
     </template>
     <div :class="['mobile-settings-actions select-none', keyboardNavigation && 'keyboard-navigation']">
-      <div :class="['mb-4 overflow-hidden rounded-2xl bg-white dark:bg-neutral-800/60']">
+      <div v-if="isAuthenticated" :class="['mb-4 overflow-hidden rounded-2xl bg-white dark:bg-neutral-800/60']">
         <GhostButton
           block size="unset"
           :class="[

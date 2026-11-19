@@ -5,6 +5,7 @@ import {
   downloadAvatar,
   forgetHinataAccessKey,
   HINATA_FUNCTION_URL,
+  hasStoredHinataAccessKey,
   hinataAccessKey,
   hinataMemory,
   HinataUnauthorizedError,
@@ -15,7 +16,7 @@ import {
 /**
  * Runs before the app mounts. Reads the personal key from the Hinata link, then writes Hinata's settings into
  * the local storage keys that the stores read at startup: the brain and voice (through the Hinata function,
- * which holds the real OpenRouter key) and the finished setup steps. The setup screens therefore never show.
+ * which holds the real OpenRouter key) and the finished setup steps. No sign-in or setup screen ever shows.
  */
 export async function hinataBootstrap() {
   if (!isHinataCloudConfigured())
@@ -30,23 +31,18 @@ export async function hinataBootstrap() {
   captureAccessKey()
 
   let state: HinataState | undefined
-  let error: string | undefined
-  for (;;) {
-    if (!hinataAccessKey())
-      await askForPersonalLink(error)
-    try {
-      state = await loadState()
-      break
+  try {
+    state = await loadState()
+  }
+  catch (error) {
+    // An old personal link saved on this device: drop it and use the built-in key.
+    if (error instanceof HinataUnauthorizedError && hasStoredHinataAccessKey()) {
+      forgetHinataAccessKey()
+      state = await loadState().catch(() => undefined)
     }
-    catch (loadError) {
-      if (loadError instanceof HinataUnauthorizedError) {
-        forgetHinataAccessKey()
-        error = 'That link did not work. Open the newest personal Hinata link.'
-        continue
-      }
+    else {
       // Offline: start with what this device already has.
-      console.warn('[hinata] state unavailable', loadError)
-      break
+      console.warn('[hinata] state unavailable', error)
     }
   }
 
@@ -164,52 +160,4 @@ async function loadAvatar(path: string) {
   catch (error) {
     console.warn('[hinata] avatar unavailable, using the sample avatar', error)
   }
-}
-
-// ---------------- the one screen: no key on this device yet ----------------
-
-const STYLE = `
-#hinata-gate{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;
-  background:radial-gradient(circle at 50% 30%,#3b2f55,#16131d 70%);color:#f3eefc;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-#hinata-gate .card{width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px;text-align:center}
-#hinata-gate h1{margin:0;font-size:30px;font-weight:700;letter-spacing:.5px;color:#d9c8ff}
-#hinata-gate p{margin:0;font-size:15px;line-height:1.5;color:#cfc4e6}
-#hinata-gate input{width:100%;box-sizing:border-box;padding:14px 16px;border-radius:14px;border:1px solid #6f5aa3;background:#221c30;color:#fff;font-size:16px}
-#hinata-gate button{padding:14px 16px;border:0;border-radius:14px;background:#a98bf0;color:#1b1430;font-size:16px;font-weight:700;cursor:pointer}
-#hinata-gate .error{font-size:14px;color:#ffb4c4;min-height:1em}
-`
-
-/** Shown only on a device that has never opened the personal link. Resolves once a valid-looking link is pasted. */
-function askForPersonalLink(error?: string): Promise<void> {
-  return new Promise((resolve) => {
-    document.getElementById('hinata-gate')?.remove()
-    if (!document.getElementById('hinata-gate-style')) {
-      const style = document.createElement('style')
-      style.id = 'hinata-gate-style'
-      style.textContent = STYLE
-      document.head.append(style)
-    }
-    const gate = document.createElement('div')
-    gate.id = 'hinata-gate'
-    gate.innerHTML = `<form class="card" novalidate>
-      <h1>Hinata</h1>
-      <p>U-um... open your personal Hinata link on this device, or paste it here.</p>
-      <input name="link" type="text" autocomplete="off" placeholder="https://.../hinata/#key=..." required>
-      <button type="submit">Open Hinata</button>
-      <div class="error" role="alert"></div>
-    </form>`
-    document.body.append(gate)
-    const input = gate.querySelector<HTMLInputElement>('input')!
-    const errorBox = gate.querySelector<HTMLElement>('.error')!
-    errorBox.textContent = error ?? ''
-    gate.querySelector('form')!.addEventListener('submit', (event) => {
-      event.preventDefault()
-      if (!captureAccessKey(input.value.trim())) {
-        errorBox.textContent = 'That is not a personal Hinata link.'
-        return
-      }
-      gate.remove()
-      resolve()
-    })
-  })
 }

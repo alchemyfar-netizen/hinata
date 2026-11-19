@@ -1,13 +1,14 @@
 /**
  * Hinata's cloud home: the `hinata` Supabase Edge Function.
  *
- * The function holds the OpenRouter key and the database credentials. The app only carries the owner's
- * personal access token, which arrives once per device through the personal Hinata link (`#key=...`).
- * No login, no email, no password.
+ * The function holds the OpenRouter key and the database credentials. The app carries the owner's personal
+ * access token, built into the site (`VITE_HINATA_ACCESS_KEY`), so every device opens straight into Hinata.
+ * A personal link (`#key=...`) can still override it on one device. No login, no email, no password.
  */
 
 const SUPABASE_URL = (import.meta.env.VITE_HINATA_SUPABASE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
 const KEY_STORAGE = 'hinata/key'
+const BUILT_IN_KEY = (import.meta.env.VITE_HINATA_ACCESS_KEY as string | undefined) ?? ''
 
 /** Base URL of the Hinata function. OpenRouter-compatible clients use `${HINATA_FUNCTION_URL}/v1/`. */
 export const HINATA_FUNCTION_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/hinata` : ''
@@ -38,10 +39,20 @@ export function isHinataCloudConfigured() {
 
 export function hinataAccessKey(): string {
   try {
-    return localStorage.getItem(KEY_STORAGE) ?? ''
+    return localStorage.getItem(KEY_STORAGE) || BUILT_IN_KEY
   }
   catch {
-    return ''
+    return BUILT_IN_KEY
+  }
+}
+
+/** Whether this device holds its own key from a personal link, rather than the built-in one. */
+export function hasStoredHinataAccessKey(): boolean {
+  try {
+    return !!localStorage.getItem(KEY_STORAGE)
+  }
+  catch {
+    return false
   }
 }
 

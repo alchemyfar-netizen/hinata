@@ -4,7 +4,6 @@ import type {} from 'pinia-plugin-synced'
 import type { TokenResponse } from '../libs/auth-oidc'
 
 import { errorMessageFrom } from '@moeru/std'
-import { isStageTamagotchi } from '@proj-airi/stage-shared'
 import { useTimeoutFn, whenever } from '@vueuse/core'
 import { delay } from 'es-toolkit'
 import { defineStore, getActivePinia } from 'pinia'
@@ -12,7 +11,6 @@ import { computed, ref, watch } from 'vue'
 
 import { client } from '../composables/api'
 import { useBreakpoints } from '../composables/use-breakpoints'
-import { triggerSignIn } from '../libs/auth'
 import { authClient, requestAuthSession } from '../libs/auth-client'
 import { refreshAccessToken, revokeRefreshToken, TokenRefreshError } from '../libs/auth-oidc'
 import { SERVER_URL } from '../libs/server'
@@ -142,15 +140,9 @@ export const useAuthStore = defineStore('auth', () => {
   const needsLogin = ref(false)
   const { isMobile } = useBreakpoints()
 
-  whenever(needsLogin, async () => {
-    if (isStageTamagotchi())
-      return
-
-    // Consume the request before opening an external browser. Pocket stays
-    // mounted when the user cancels there, so leaving this true would make
-    // the next button click a no-op instead of starting a new OIDC flow.
+  // Hinata has no accounts: a sign-in request is dropped instead of opening a sign-in page.
+  whenever(needsLogin, () => {
     needsLogin.value = false
-    await triggerSignIn()
   })
 
   // Reset the flag if the viewport class flips, so a stale needsLogin from a
@@ -595,9 +587,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   /** Publishes a login request on the leader before any renderer can consume it. */
   async function requestLogin(): Promise<void> {
-    if (isAuthenticated.value)
-      return
-    needsLogin.value = true
+    // Hinata has no accounts.
   }
 
   /** Requests sign-in only if the failed request still belongs to this session. */
@@ -606,7 +596,6 @@ export const useAuthStore = defineStore('auth', () => {
       return
     sessionVersion.value += 1
     clearAuthState()
-    needsLogin.value = true
   }
 
   const updateCredits = async () => {
