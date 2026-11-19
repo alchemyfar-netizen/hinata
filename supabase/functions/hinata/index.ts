@@ -2,6 +2,7 @@
 // neither. Every request must carry the owner's personal access token (from their personal Hinata link).
 //
 // Routes (under /functions/v1/hinata):
+//   POST /v1/audio/transcriptions  hearing: speech to text (OpenAI-compatible, answered by Gemini)
 //   /v1/*           OpenRouter API, passed through with the real key (chat, voice, model lists)
 //   GET  /state     name, remembered facts, recent messages and settings
 //   POST /memories  { facts: string[] }
@@ -78,6 +79,69 @@ async function proxyOpenRouter(req: Request, path: string) {
   return new Response(upstream.body, { status: upstream.status, headers: out })
 }
 
+// ---------------- hearing ----------------
+
+const TRANSCRIBE_MODELS = ['google/gemini-2.5-flash-lite', 'google/gemini-2.5-flash']
+const TRANSCRIBE_PROMPT = 'Transcribe the speech in this audio exactly as spoken (English, Tamil, Hindi or a mix; write it in the script '
+  + 'the speaker would type in chat). Output only the spoken words, with no notes, quotes or labels. '
+  + 'If there is no clear human speech, output nothing at all.'
+
+function toBase64(bytes: Uint8Array) {
+  let binary = ''
+  for (let i = 0; i < bytes.length; i += 0x8000)
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000))
+  return btoa(binary)
+}
+
+function audioFormat(file: File) {
+  const hint = `${file.type} ${file.name}`.toLowerCase()
+  for (const format of ['wav', 'mp3', 'ogg', 'webm', 'flac', 'm4a', 'aac'])
+    if (hint.includes(format))
+      return format
+  return hint.includes('mpeg') ? 'mp3' : 'wav'
+}
+
+/**
+ * OpenAI-compatible `POST /v1/audio/transcriptions` (multipart `file`), answered by an audio-capable model on
+ * OpenRouter, which has no Whisper endpoint of its own. Works the same in every browser, unlike browser speech APIs.
+ */
+async function transcribe(req: Request) {
+  const form = await req.formData()
+  const file = form.get('file')
+  if (!(file instanceof File) || !file.size)
+    return json(req, { error: 'No audio received.' }, 400)
+  const audio = { data: toBase64(new Uint8Array(await file.arrayBuffer())), format: audioFormat(file) }
+
+  let lastError = ''
+  for (const model of TRANSCRIBE_MODELS) {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://alchemyfar-netizen.github.io/hinata/',
+        'X-Title': 'Hinata',
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0,
+        messages: [{ role: 'user', content: [{ type: 'text', text: TRANSCRIBE_PROMPT }, { type: 'input_audio', input_audio: audio }] }],
+      }),
+    })
+    if (!res.ok) {
+      lastError = `${model} ${res.status}: ${(await res.text()).slice(0, 200)}`
+      continue
+    }
+    const data = await res.json()
+    let text = String(data.choices?.[0]?.message?.content ?? '').trim()
+    // Models sometimes describe silence instead of returning nothing.
+    if (/^[([]?\s*(no (clear )?(human )?speech|silence|inaudible|no audio)/i.test(text))
+      text = ''
+    return json(req, { text })
+  }
+  return json(req, { error: 'Transcription failed.', detail: lastError }, 502)
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS')
     return new Response(null, { status: 204, headers: cors(req) })
@@ -87,6 +151,9 @@ Deno.serve(async (req) => {
   const path = new URL(req.url).pathname.replace(/^.*?\/hinata\/?/, '')
 
   try {
+    if (path === 'v1/audio/transcriptions' && req.method === 'POST')
+      return await transcribe(req)
+
     if (path.startsWith('v1/'))
       return await proxyOpenRouter(req, path.slice(3))
 

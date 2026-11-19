@@ -463,6 +463,21 @@ onUnmounted(() => {
           @attach-images="imageInput?.click()"
           @call="startVoiceCall"
         />
+        <!-- Hinata: one tap starts a hands-free conversation. She listens, answers out loud, and listens again. -->
+        <button
+          v-if="!call.active"
+          type="button"
+          data-testid="hinata-talk-button"
+          aria-label="Talk to Hinata"
+          title="Talk to Hinata"
+          :class="[
+            'size-10 shrink-0 self-end flex items-center justify-center rounded-full',
+            'bg-primary-500 text-white shadow-md transition active:scale-95 hover:bg-primary-600',
+          ]"
+          @click="startVoiceCall"
+        >
+          <span aria-hidden="true" :class="['i-solar:phone-calling-bold size-5']" />
+        </button>
         <input ref="imageInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple :class="['hidden']" @change="selectFiles">
         <div
           ref="inputBubble"

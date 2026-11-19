@@ -224,6 +224,21 @@ watch(replyTarget, async (target) => {
       <!-- The toolbar inside the composer, like the desktop app: add menu, recording status, microphone, and send. -->
       <div :class="['absolute inset-x-1.5 bottom-1.5 z-10 flex items-center gap-1.5']">
         <ChatComposerAddMenu :in-call="call.active" :recording="voiceRecording" @attach-images="imageInput?.click()" @call="startVoiceCall" />
+        <!-- Hinata: one tap starts a hands-free conversation. She listens, answers out loud, and listens again. -->
+        <button
+          v-if="!call.active"
+          type="button"
+          data-testid="hinata-talk-button"
+          aria-label="Talk to Hinata"
+          title="Talk to Hinata"
+          :class="[
+            'size-9 shrink-0 self-end flex items-center justify-center rounded-full',
+            'bg-primary-500 text-white shadow-md transition active:scale-95 hover:bg-primary-600',
+          ]"
+          @click="startVoiceCall"
+        >
+          <span aria-hidden="true" :class="['i-solar:phone-calling-bold size-5']" />
+        </button>
         <!-- The recording status and the walkie-talkie bar show here, so the composer keeps its height. -->
         <div ref="voiceStatus" data-testid="composer-voice-status" :class="['relative h-9 min-w-0 flex-1 rounded-full']" />
         <!-- A call listens already, so the microphone becomes the mute button of the call. -->
