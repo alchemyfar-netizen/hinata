@@ -50,8 +50,6 @@ for (const [name, source] of Object.entries({
   settingsSearch.provide(name, source)
 
 const pinia = createPinia()
-const synced = setupSynced()
-pinia.use(synced.pinia)
 if (import.meta.env.DEV)
   pinia.use(piniaPluginTracing)
 
@@ -79,28 +77,34 @@ startErrorReporting(app, () => useSettingsAnalytics(pinia).analyticsEnabled, asy
   return createSentryAdapter(options)
 })
 
-app
-  .use(synced.vue)
-  .use(MotionPlugin)
-  // TODO: Fix autoAnimatePlugin type error
-  .use(autoAnimatePlugin as unknown as Plugin)
-  .use(router)
-  .use(pinia)
-  .use(PiniaColada)
-  .use(i18n)
-  .use(Tres)
-  .use(trackButtonPlugin)
-  // NOTICE:
-  // Push to Talk holds Space, but no Web API reports a hardware keyboard.
-  // A fine pointer (mouse or trackpad) is the closest live signal. Phones and touch-only tablets lack it.
-  // Source: https://www.w3.org/TR/mediaqueries-4/#any-input
-  // Remove when stage-web gets a touch hold control.
-  .provide(pushToTalkTriggerKey, useMediaQuery('(any-pointer: fine)'))
 
 // Hinata signs in and applies the user's cloud settings before any store reads local storage.
+// The synced runtime joins the cross-tab leader election, so it starts only after the startup step:
+// a tab waiting at the sign-in screen never mounts and must not become the leader of the other tabs.
 void hinataBootstrap()
   .catch(error => console.error('[hinata] startup step failed', error))
-  .finally(() => app.mount('#app'))
+  .finally(() => {
+    const synced = setupSynced()
+    pinia.use(synced.pinia)
+    app
+      .use(synced.vue)
+      .use(MotionPlugin)
+      // TODO: Fix autoAnimatePlugin type error
+      .use(autoAnimatePlugin as unknown as Plugin)
+      .use(router)
+      .use(pinia)
+      .use(PiniaColada)
+      .use(i18n)
+      .use(Tres)
+      .use(trackButtonPlugin)
+      // NOTICE:
+      // Push to Talk holds Space, but no Web API reports a hardware keyboard.
+      // A fine pointer (mouse or trackpad) is the closest live signal. Phones and touch-only tablets lack it.
+      // Source: https://www.w3.org/TR/mediaqueries-4/#any-input
+      // Remove when stage-web gets a touch hold control.
+      .provide(pushToTalkTriggerKey, useMediaQuery('(any-pointer: fine)'))
+      .mount('#app')
+  })
 
 if (import.meta.env.DEV && !import.meta.env.SSR) {
   function captureEvents(el: HTMLElement) {
