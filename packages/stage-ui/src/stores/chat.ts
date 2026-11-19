@@ -50,7 +50,8 @@ import { resolveLlmTools } from './ai/chat-llm/tool-resolver'
 import { useLlmToolsStore } from './ai/chat-llm/tools'
 import { useLlmToolsetPromptsStore } from './ai/chat-llm/toolset-prompts'
 import { useAuthStore } from './auth'
-import { createMinecraftContext, createRuntimePromptContext, createUserAccountContext } from './chat/context-providers'
+import { learnFromTurn } from '../libs/hinata-cloud'
+import { createHinataMemoryContext, createMinecraftContext, createRuntimePromptContext, createUserAccountContext } from './chat/context-providers'
 import { useChatContextStore } from './chat/context-store'
 import { describeChatImages, replaceToolResultImages } from './chat/image-projection'
 import { composeRecipeSpacePrompt, composeSystemPrompt } from './chat/prompt-recipe'
@@ -1053,6 +1054,9 @@ export const useChatStore = defineStore('chat', () => {
         const account = createUserAccountContext(authStore)
         if (account)
           snapshot[account.contextId] = [account]
+        const hinataMemoryContext = createHinataMemoryContext()
+        if (hinataMemoryContext)
+          snapshot[hinataMemoryContext.contextId] = [hinataMemoryContext]
         return snapshot
       },
     },
@@ -1138,6 +1142,26 @@ export const useChatStore = defineStore('chat', () => {
       if (artistry?.autonomousEnabled && artistry?.autonomousTarget === 'assistant')
         void artistryAutonomousStore.runArtistTask(messageText, toProviderHistory(sessionMessages))
     },
+  })
+
+  // Hinata: keep the conversation and the facts worth remembering in the Hinata cloud, shared by phone and PC.
+  runtime.hooks.onChatTurnComplete(async (chat, context) => {
+    if (context.speaks === false)
+      return
+    const content = (context.message as { content?: unknown }).content
+    const userText = typeof content === 'string'
+      ? content
+      : Array.isArray(content)
+        ? content.map(part => (part && typeof part === 'object' && 'text' in part ? String(part.text) : '')).join(' ')
+        : ''
+    if (!userText.trim() || !chat.outputText.trim())
+      return
+    let apiKey = ''
+    try {
+      apiKey = String(JSON.parse(localStorage.getItem('settings/providers/configured') ?? '{}')?.['openrouter-ai']?.config?.apiKey ?? '')
+    }
+    catch {}
+    void learnFromTurn(userText, chat.outputText, apiKey)
   })
 
   // One request owns preparation and generation. Cancellation cannot miss asynchronous startup.

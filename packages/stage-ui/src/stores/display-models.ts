@@ -65,6 +65,19 @@ export type DisplayModelSyncStatus = 'local-only' | 'queued' | 'uploading' | 'sy
 const syncableFormats: string[] = [DisplayModelFormat.Live2dZip, DisplayModelFormat.VRM]
 
 const displayModelsPresets: DisplayModel[] = [
+  // Hinata's model is private: the Hinata startup step downloads it from the user's cloud folder and sets
+  // `globalThis.__HINATA_VRM_URL__`. Until then the sample avatar stands in.
+  {
+    id: 'preset-vrm-hinata',
+    format: DisplayModelFormat.VRM,
+    type: 'url',
+    get url() {
+      return (globalThis as { __HINATA_VRM_URL__?: string }).__HINATA_VRM_URL__ ?? presetVrmAvatarAUrl
+    },
+    name: 'Hinata',
+    previewImage: presetVrmAvatarAPreview,
+    importedAt: 1733113886840,
+  },
   { id: 'preset-live2d-1', format: DisplayModelFormat.Live2dZip, type: 'url', url: presetLive2dProUrl, name: 'Hiyori (Pro)', previewImage: presetLive2dPreview, importedAt: 1733113886840 },
   { id: 'preset-live2d-2', format: DisplayModelFormat.Live2dZip, type: 'url', url: presetLive2dFreeUrl, name: 'Hiyori (Free)', previewImage: presetLive2dPreview, importedAt: 1733113886840 },
   { id: 'preset-vrm-1', format: DisplayModelFormat.VRM, type: 'url', url: presetVrmAvatarAUrl, name: 'AvatarSample_A', previewImage: presetVrmAvatarAPreview, importedAt: 1733113886840 },

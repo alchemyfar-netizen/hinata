@@ -786,8 +786,13 @@ export const useAiriCardStore = defineStore('airi-card', () => {
       airi: {
         // Every device ships the preset model, so this reference is part of the
         // built-in content. An unedited `default` card then sends no avatar fields.
-        defaultAvatarModelId: 'default-live2d-avatar-model',
+        defaultAvatarModelId: 'hinata-vrm-avatar-model',
         avatarModels: [{
+          id: 'hinata-vrm-avatar-model',
+          displayModelId: 'preset-vrm-hinata',
+          type: 'vrm',
+          config: {},
+        }, {
           id: 'default-live2d-avatar-model',
           displayModelId: 'preset-live2d-1',
           type: 'live2d',

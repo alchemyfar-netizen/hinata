@@ -24,6 +24,7 @@ import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router
 import { routes } from 'vue-router/auto-routes'
 
 import App from './App.vue'
+import { hinataBootstrap } from './hinata/bootstrap'
 
 import { i18n } from './modules/i18n'
 
@@ -95,7 +96,11 @@ app
   // Source: https://www.w3.org/TR/mediaqueries-4/#any-input
   // Remove when stage-web gets a touch hold control.
   .provide(pushToTalkTriggerKey, useMediaQuery('(any-pointer: fine)'))
-  .mount('#app')
+
+// Hinata signs in and applies the user's cloud settings before any store reads local storage.
+void hinataBootstrap()
+  .catch(error => console.error('[hinata] startup step failed', error))
+  .finally(() => app.mount('#app'))
 
 if (import.meta.env.DEV && !import.meta.env.SSR) {
   function captureEvents(el: HTMLElement) {
