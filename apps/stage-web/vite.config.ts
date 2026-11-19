@@ -215,6 +215,9 @@ export default defineConfig({
           manifest: {
             name: 'Hinata',
             short_name: 'Hinata',
+            description: 'Hinata, your gentle companion',
+            theme_color: '#7a5cc9',
+            background_color: '#16131d',
             icons: [
               {
                 src: 'web-app-manifest-192x192.png',
@@ -241,6 +244,9 @@ export default defineConfig({
             ],
           },
           workbox: {
+            // Hinata: a new service worker takes over at once, so a fix reaches every open device on the next load.
+            skipWaiting: true,
+            clientsClaim: true,
             maximumFileSizeToCacheInBytes: 64 * 1024 * 1024,
             // The WebAssembly files are over 80% of the build (DuckDB alone ships
             // three variants and a browser loads one). Precaching them downloads

@@ -26,6 +26,8 @@ export interface HinataProfileSettings {
   speechVoice?: string
   /** Path inside the user's folder of the private bucket, e.g. `Hinata.vrm`. */
   avatarPath?: string
+  /** True once the user has set a password for signing in on other devices. */
+  passwordSet?: boolean
 }
 
 export interface HinataProfile {
@@ -87,6 +89,33 @@ function sessionFrom(data: any): HinataSession {
     refresh_token: data.refresh_token,
     expires_at: data.expires_at ?? Math.floor(Date.now() / 1000) + Number(data.expires_in ?? 3600),
     user: { id: data.user?.id, email: data.user?.email },
+  }
+}
+
+/** Signs in with email and password. Nothing is emailed. */
+export async function signInWithPassword(email: string, password: string) {
+  try {
+    writeSession(sessionFrom(await authFetch('token?grant_type=password', { email, password })))
+  }
+  catch (error) {
+    const message = error instanceof Error ? error.message : ''
+    throw new Error(/invalid login credentials/i.test(message) ? 'That email or password is not right.' : message || 'Could not sign in.')
+  }
+}
+
+/** Sets the password of the signed-in account, so other devices can sign in without email. */
+export async function setPassword(password: string) {
+  const session = await validSession()
+  if (!session)
+    throw new Error('Not signed in to Hinata')
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    method: 'PUT',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    throw new Error(data.msg || data.message || `Could not save the password (${res.status})`)
   }
 }
 

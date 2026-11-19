@@ -34,6 +34,11 @@ export const usePWAStore = defineStore('pwa', () => {
     let updateSW: (reloadPage?: boolean) => Promise<void> = async () => {}
 
     function showPrompt() {
+      // Hinata: apply every update at once. A waiting worker kept serving old, broken builds after fixes.
+      console.info('[pwa] new version ready; activating it and reloading')
+      void updateSW(true)
+      return
+      // eslint-disable-next-line no-unreachable
       if (Date.now() - dismissedAt < REMIND_AFTER_MS) {
         return
       }

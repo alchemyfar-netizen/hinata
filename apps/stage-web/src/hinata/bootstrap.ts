@@ -9,7 +9,8 @@ import {
   loadProfile,
   recentMessages,
   saveProfile,
-  sendLoginLink,
+  setPassword,
+  signInWithPassword,
   validSession,
 } from '@proj-airi/stage-ui/libs/hinata-cloud'
 
@@ -23,10 +24,8 @@ export async function hinataBootstrap() {
     return
 
   const redirect = await consumeLoginRedirect()
-  if (!await validSession()) {
+  if (!await validSession())
     await showLoginScreen(redirect.error)
-    return
-  }
 
   let profile: HinataProfile | undefined
   try {
@@ -41,6 +40,12 @@ export async function hinataBootstrap() {
     const key = await askForOpenRouterKey()
     profile.settings.openrouterKey = key
     await saveProfile({ settings: { openrouterKey: key } }).catch(error => console.warn('[hinata] key not saved', error))
+  }
+
+  if (profile && !profile.settings.passwordSet) {
+    const saved = await askToSetPassword()
+    if (saved)
+      await saveProfile({ settings: { passwordSet: true } }).catch(error => console.warn('[hinata] password flag not saved', error))
   }
 
   if (profile)
@@ -169,47 +174,92 @@ function mountGate(html: string) {
   return gate
 }
 
-/** Never resolves: the emailed link reopens the app signed in. */
-function showLoginScreen(error?: string): Promise<never> {
-  const gate = mountGate(`
-    <h1>Hinata</h1>
-    <p>U-um... welcome back. Type your email and I'll send you a link to log in.</p>
-    <input name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
-    <button type="submit">Send login link</button>
-    <div class="error" role="alert"></div>
-    <div class="note">Open the link on this device. Your memories stay private to your account.</div>
-  `)
-  const form = gate.querySelector('form')!
-  const button = gate.querySelector('button')!
-  const errorBox = gate.querySelector<HTMLElement>('.error')!
-  const input = gate.querySelector<HTMLInputElement>('input')!
-  errorBox.textContent = error ?? ''
-  input.focus()
+/** Email + password sign-in. Resolves once signed in; nothing is emailed. */
+function showLoginScreen(error?: string): Promise<void> {
+  return new Promise((resolve) => {
+    const gate = mountGate(`
+      <h1>Hinata</h1>
+      <p>U-um... welcome back. Sign in so I can remember you.</p>
+      <input name="email" type="email" autocomplete="username" inputmode="email" placeholder="Email" required>
+      <input name="password" type="password" autocomplete="current-password" placeholder="Password" required>
+      <button type="submit">Sign in</button>
+      <div class="error" role="alert"></div>
+      <div class="note">Your memories stay private to your account.</div>
+    `)
+    const form = gate.querySelector('form')!
+    const button = gate.querySelector('button')!
+    const errorBox = gate.querySelector<HTMLElement>('.error')!
+    const email = gate.querySelector<HTMLInputElement>('input[name="email"]')!
+    const password = gate.querySelector<HTMLInputElement>('input[name="password"]')!
+    errorBox.textContent = error ?? ''
+    email.focus()
 
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault()
-    const email = input.value.trim()
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      errorBox.textContent = 'Please type a valid email.'
-      return
-    }
-    button.disabled = true
-    errorBox.textContent = ''
-    try {
-      await sendLoginLink(email, location.origin + import.meta.env.BASE_URL)
-      mountGate(`
-        <h1>Check your email</h1>
-        <p>I sent a login link to <b>${email.replace(/[<>&"]/g, '')}</b>. Open it on this device and I'll be right here.</p>
-        <div class="note">No email? Check spam, or wait a minute and try again.</div>
-        <button type="button" onclick="location.reload()">Try again</button>
-      `)
-    }
-    catch (sendError) {
-      button.disabled = false
-      errorBox.textContent = sendError instanceof Error ? sendError.message : 'Could not send the link.'
-    }
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      if (!/^\S+@\S+\.\S+$/.test(email.value.trim()) || !password.value) {
+        errorBox.textContent = 'Please type your email and password.'
+        return
+      }
+      button.disabled = true
+      errorBox.textContent = ''
+      try {
+        await signInWithPassword(email.value.trim(), password.value)
+        gate.remove()
+        resolve()
+      }
+      catch (signInError) {
+        button.disabled = false
+        errorBox.textContent = signInError instanceof Error ? signInError.message : 'Could not sign in.'
+      }
+    })
   })
-  return new Promise<never>(() => {})
+}
+
+/** Asks once, on a signed-in device, for a password that other devices use to sign in. Resolves true when saved. */
+function askToSetPassword(): Promise<boolean> {
+  return new Promise((resolve) => {
+    const gate = mountGate(`
+      <h1>Set a password</h1>
+      <p>Choose a password for signing in to me on your phone and other devices. No more emails.</p>
+      <input name="password" type="password" autocomplete="new-password" placeholder="New password (8+ characters)" required>
+      <input name="confirm" type="password" autocomplete="new-password" placeholder="Type it again" required>
+      <button type="submit">Save password</button>
+      <div class="error" role="alert"></div>
+      <div class="note"><a href="#" data-later style="color:#cbb8ff">Later</a></div>
+    `)
+    const button = gate.querySelector<HTMLButtonElement>('button')!
+    const errorBox = gate.querySelector<HTMLElement>('.error')!
+    const password = gate.querySelector<HTMLInputElement>('input[name="password"]')!
+    const confirm = gate.querySelector<HTMLInputElement>('input[name="confirm"]')!
+    password.focus()
+    gate.querySelector('[data-later]')!.addEventListener('click', (event) => {
+      event.preventDefault()
+      gate.remove()
+      resolve(false)
+    })
+    gate.querySelector('form')!.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      if (password.value.length < 8) {
+        errorBox.textContent = 'Please use at least 8 characters.'
+        return
+      }
+      if (password.value !== confirm.value) {
+        errorBox.textContent = 'The two passwords are different.'
+        return
+      }
+      button.disabled = true
+      errorBox.textContent = ''
+      try {
+        await setPassword(password.value)
+        gate.remove()
+        resolve(true)
+      }
+      catch (saveError) {
+        button.disabled = false
+        errorBox.textContent = saveError instanceof Error ? saveError.message : 'Could not save the password.'
+      }
+    })
+  })
 }
 
 function askForOpenRouterKey(): Promise<string> {
