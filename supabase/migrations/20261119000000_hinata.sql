@@ -62,3 +62,7 @@ create policy "hinata owner update" on storage.objects for update to authenticat
 drop policy if exists "hinata owner delete" on storage.objects;
 create policy "hinata owner delete" on storage.objects for delete to authenticated
   using (bucket_id = 'hinata-private' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+-- The Hinata server function reads and writes with the service role.
+grant select, insert, update, delete on public.hinata_profile, public.hinata_memories, public.hinata_messages to service_role;
+grant usage, select on all sequences in schema public to service_role;

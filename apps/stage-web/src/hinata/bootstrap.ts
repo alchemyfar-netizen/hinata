@@ -1,64 +1,63 @@
-import type { HinataProfile } from '@proj-airi/stage-ui/libs/hinata-cloud'
+import type { HinataState } from '@proj-airi/stage-ui/libs/hinata-cloud'
 
 import {
-  consumeLoginRedirect,
-  downloadPrivateFile,
+  captureAccessKey,
+  downloadAvatar,
+  forgetHinataAccessKey,
+  HINATA_FUNCTION_URL,
+  hinataAccessKey,
   hinataMemory,
+  HinataUnauthorizedError,
   isHinataCloudConfigured,
-  loadMemories,
-  loadProfile,
-  recentMessages,
-  saveProfile,
-  sendLoginLink,
-  setPassword,
-  signInWithPassword,
-  validSession,
+  loadState,
 } from '@proj-airi/stage-ui/libs/hinata-cloud'
 
 /**
- * Runs before the app mounts. Signs the user in to the Hinata cloud, then writes their settings into
- * the local storage keys that the stores read at startup: the OpenRouter brain, the voice, and the
- * finished setup steps. The stores therefore start configured and the setup screens never show.
+ * Runs before the app mounts. Reads the personal key from the Hinata link, then writes Hinata's settings into
+ * the local storage keys that the stores read at startup: the brain and voice (through the Hinata function,
+ * which holds the real OpenRouter key) and the finished setup steps. The setup screens therefore never show.
  */
 export async function hinataBootstrap() {
   if (!isHinataCloudConfigured())
     return
 
-  const redirect = await consumeLoginRedirect()
-  if (!await validSession())
-    await showLoginScreen(redirect.error)
-
-  let profile: HinataProfile | undefined
   try {
-    profile = await loadProfile()
+    // Left over from the email and password sign-in of earlier versions.
+    localStorage.removeItem('hinata/session')
   }
-  catch (error) {
-    // Offline: start with the settings this device already has.
-    console.warn('[hinata] profile unavailable', error)
+  catch {}
+
+  captureAccessKey()
+
+  let state: HinataState | undefined
+  let error: string | undefined
+  for (;;) {
+    if (!hinataAccessKey())
+      await askForPersonalLink(error)
+    try {
+      state = await loadState()
+      break
+    }
+    catch (loadError) {
+      if (loadError instanceof HinataUnauthorizedError) {
+        forgetHinataAccessKey()
+        error = 'That link did not work. Open the newest personal Hinata link.'
+        continue
+      }
+      // Offline: start with what this device already has.
+      console.warn('[hinata] state unavailable', loadError)
+      break
+    }
   }
 
-  if (profile && !profile.settings.openrouterKey && !localOpenRouterKey()) {
-    const key = await askForOpenRouterKey()
-    profile.settings.openrouterKey = key
-    await saveProfile({ settings: { openrouterKey: key } }).catch(error => console.warn('[hinata] key not saved', error))
-  }
-
-  if (profile && !profile.settings.passwordSet) {
-    const saved = await askToSetPassword()
-    if (saved)
-      await saveProfile({ settings: { passwordSet: true } }).catch(error => console.warn('[hinata] password flag not saved', error))
-  }
-
-  if (profile)
-    applyProfile(profile)
+  applySettings(state)
   markSetupDone()
 
-  await Promise.all([
-    loadMemories().then((facts) => { hinataMemory.facts = facts }).catch(() => {}),
-    recentMessages().then((messages) => { hinataMemory.recent = messages }).catch(() => {}),
-    profile?.settings.avatarPath ? loadAvatar(profile.settings.avatarPath) : undefined,
-  ])
-  hinataMemory.userName = profile?.user_name ?? null
+  hinataMemory.userName = state?.userName ?? null
+  hinataMemory.facts = state?.facts ?? []
+  hinataMemory.recent = state?.recent ?? []
+  if (state?.settings.avatarPath)
+    await loadAvatar(state.settings.avatarPath)
 }
 
 // ---------------- local settings ----------------
@@ -76,29 +75,22 @@ function readJson<T>(key: string, fallback: T): T {
   }
 }
 
-function localOpenRouterKey(): string {
-  return String(readJson<Record<string, any>>(PROVIDERS_KEY, {})['openrouter-ai']?.config?.apiKey ?? '')
-}
-
 function setIfEmpty(key: string, value: string, emptyValues: string[] = ['']) {
   const current = localStorage.getItem(key)
   if (current === null || emptyValues.includes(current))
     localStorage.setItem(key, value)
 }
 
-function applyProfile(profile: HinataProfile) {
-  const { settings } = profile
-  const key = settings.openrouterKey || localOpenRouterKey()
-  if (!key)
-    return
-
+function applySettings(state: HinataState | undefined) {
+  const settings = state?.settings ?? {}
   const providers = readJson<Record<string, any>>(PROVIDERS_KEY, {})
   for (const id of ['openrouter-ai', 'openrouter-audio-speech']) {
     providers[id] = {
       ...providers[id],
       id,
       definitionId: id,
-      config: { ...providers[id]?.config, apiKey: key, baseUrl: 'https://openrouter.ai/api/v1/' },
+      // The Hinata function speaks the OpenRouter API and adds the real key; the device only has its personal key.
+      config: { ...providers[id]?.config, apiKey: hinataAccessKey(), baseUrl: `${HINATA_FUNCTION_URL}/v1/` },
       status: 'configured',
       configuredBy: 'user',
     }
@@ -135,7 +127,7 @@ async function loadAvatar(path: string) {
     const cache = 'caches' in globalThis ? await caches.open(AVATAR_CACHE) : undefined
     let blob = await (await cache?.match(cacheUrl))?.blob()
     if (!blob) {
-      blob = await downloadPrivateFile(path)
+      blob = await downloadAvatar()
       await cache?.put(cacheUrl, new Response(blob, { headers: { 'Content-Type': 'application/octet-stream' } }))
     }
     ;(globalThis as { __HINATA_VRM_URL__?: string }).__HINATA_VRM_URL__ = URL.createObjectURL(blob)
@@ -145,7 +137,7 @@ async function loadAvatar(path: string) {
   }
 }
 
-// ---------------- screens ----------------
+// ---------------- the one screen: no key on this device yet ----------------
 
 const STYLE = `
 #hinata-gate{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;
@@ -155,151 +147,40 @@ const STYLE = `
 #hinata-gate p{margin:0;font-size:15px;line-height:1.5;color:#cfc4e6}
 #hinata-gate input{width:100%;box-sizing:border-box;padding:14px 16px;border-radius:14px;border:1px solid #6f5aa3;background:#221c30;color:#fff;font-size:16px}
 #hinata-gate button{padding:14px 16px;border:0;border-radius:14px;background:#a98bf0;color:#1b1430;font-size:16px;font-weight:700;cursor:pointer}
-#hinata-gate button:disabled{opacity:.6;cursor:default}
-#hinata-gate .note{font-size:13px;color:#a99cc4}
 #hinata-gate .error{font-size:14px;color:#ffb4c4;min-height:1em}
 `
 
-function mountGate(html: string) {
-  document.getElementById('hinata-gate')?.remove()
-  if (!document.getElementById('hinata-gate-style')) {
-    const style = document.createElement('style')
-    style.id = 'hinata-gate-style'
-    style.textContent = STYLE
-    document.head.append(style)
-  }
-  const gate = document.createElement('div')
-  gate.id = 'hinata-gate'
-  gate.innerHTML = `<form class="card" novalidate>${html}</form>`
-  document.body.append(gate)
-  return gate
-}
-
-/** Email + password sign-in. Resolves once signed in; nothing is emailed. */
-function showLoginScreen(error?: string): Promise<void> {
+/** Shown only on a device that has never opened the personal link. Resolves once a valid-looking link is pasted. */
+function askForPersonalLink(error?: string): Promise<void> {
   return new Promise((resolve) => {
-    const gate = mountGate(`
+    document.getElementById('hinata-gate')?.remove()
+    if (!document.getElementById('hinata-gate-style')) {
+      const style = document.createElement('style')
+      style.id = 'hinata-gate-style'
+      style.textContent = STYLE
+      document.head.append(style)
+    }
+    const gate = document.createElement('div')
+    gate.id = 'hinata-gate'
+    gate.innerHTML = `<form class="card" novalidate>
       <h1>Hinata</h1>
-      <p>U-um... welcome back. Sign in so I can remember you.</p>
-      <input name="email" type="email" autocomplete="username" inputmode="email" placeholder="Email" required>
-      <input name="password" type="password" autocomplete="current-password" placeholder="Password" required>
-      <button type="submit">Sign in</button>
+      <p>U-um... open your personal Hinata link on this device, or paste it here.</p>
+      <input name="link" type="text" autocomplete="off" placeholder="https://.../hinata/#key=..." required>
+      <button type="submit">Open Hinata</button>
       <div class="error" role="alert"></div>
-      <div class="note"><a href="#" data-forgot style="color:#cbb8ff">Forgot password? Email me a sign-in link</a></div>
-      <div class="note">Your memories stay private to your account.</div>
-    `)
-    const form = gate.querySelector('form')!
-    const button = gate.querySelector('button')!
-    const errorBox = gate.querySelector<HTMLElement>('.error')!
-    const email = gate.querySelector<HTMLInputElement>('input[name="email"]')!
-    const password = gate.querySelector<HTMLInputElement>('input[name="password"]')!
-    errorBox.textContent = error ?? ''
-    email.focus()
-
-    gate.querySelector('[data-forgot]')!.addEventListener('click', async (event) => {
-      event.preventDefault()
-      if (!/^\S+@\S+\.\S+$/.test(email.value.trim())) {
-        errorBox.textContent = 'Type your email first, then tap the link again.'
-        return
-      }
-      errorBox.textContent = ''
-      try {
-        await sendLoginLink(email.value.trim(), location.origin + import.meta.env.BASE_URL)
-        errorBox.textContent = 'Sent! Open the link in the email on this device, then set a new password.'
-      }
-      catch (sendError) {
-        errorBox.textContent = sendError instanceof Error ? sendError.message : 'Could not send the link.'
-      }
-    })
-
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault()
-      if (!/^\S+@\S+\.\S+$/.test(email.value.trim()) || !password.value) {
-        errorBox.textContent = 'Please type your email and password.'
-        return
-      }
-      button.disabled = true
-      errorBox.textContent = ''
-      try {
-        await signInWithPassword(email.value.trim(), password.value)
-        gate.remove()
-        resolve()
-      }
-      catch (signInError) {
-        button.disabled = false
-        errorBox.textContent = signInError instanceof Error ? signInError.message : 'Could not sign in.'
-      }
-    })
-  })
-}
-
-/** Asks once, on a signed-in device, for a password that other devices use to sign in. Resolves true when saved. */
-function askToSetPassword(): Promise<boolean> {
-  return new Promise((resolve) => {
-    const gate = mountGate(`
-      <h1>Set a password</h1>
-      <p>Choose a password for signing in to me on your phone and other devices. No more emails.</p>
-      <input name="password" type="password" autocomplete="new-password" placeholder="New password (8+ characters)" required>
-      <input name="confirm" type="password" autocomplete="new-password" placeholder="Type it again" required>
-      <button type="submit">Save password</button>
-      <div class="error" role="alert"></div>
-      <div class="note"><a href="#" data-later style="color:#cbb8ff">Later</a></div>
-    `)
-    const button = gate.querySelector<HTMLButtonElement>('button')!
-    const errorBox = gate.querySelector<HTMLElement>('.error')!
-    const password = gate.querySelector<HTMLInputElement>('input[name="password"]')!
-    const confirm = gate.querySelector<HTMLInputElement>('input[name="confirm"]')!
-    password.focus()
-    gate.querySelector('[data-later]')!.addEventListener('click', (event) => {
-      event.preventDefault()
-      gate.remove()
-      resolve(false)
-    })
-    gate.querySelector('form')!.addEventListener('submit', async (event) => {
-      event.preventDefault()
-      if (password.value.length < 8) {
-        errorBox.textContent = 'Please use at least 8 characters.'
-        return
-      }
-      if (password.value !== confirm.value) {
-        errorBox.textContent = 'The two passwords are different.'
-        return
-      }
-      button.disabled = true
-      errorBox.textContent = ''
-      try {
-        await setPassword(password.value)
-        gate.remove()
-        resolve(true)
-      }
-      catch (saveError) {
-        button.disabled = false
-        errorBox.textContent = saveError instanceof Error ? saveError.message : 'Could not save the password.'
-      }
-    })
-  })
-}
-
-function askForOpenRouterKey(): Promise<string> {
-  return new Promise((resolve) => {
-    const gate = mountGate(`
-      <h1>One last thing</h1>
-      <p>Paste your OpenRouter key so I can think and talk. I'll remember it on all your devices.</p>
-      <input name="key" type="password" autocomplete="off" placeholder="sk-or-..." required>
-      <button type="submit">Save</button>
-      <div class="error" role="alert"></div>
-    `)
+    </form>`
+    document.body.append(gate)
     const input = gate.querySelector<HTMLInputElement>('input')!
     const errorBox = gate.querySelector<HTMLElement>('.error')!
+    errorBox.textContent = error ?? ''
     gate.querySelector('form')!.addEventListener('submit', (event) => {
       event.preventDefault()
-      const key = input.value.trim()
-      if (!key.startsWith('sk-')) {
-        errorBox.textContent = 'That doesn\'t look like an OpenRouter key.'
+      if (!captureAccessKey(input.value.trim())) {
+        errorBox.textContent = 'That is not a personal Hinata link.'
         return
       }
       gate.remove()
-      resolve(key)
+      resolve()
     })
   })
 }

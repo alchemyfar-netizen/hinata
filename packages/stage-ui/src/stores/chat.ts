@@ -1156,12 +1156,7 @@ export const useChatStore = defineStore('chat', () => {
         : ''
     if (!userText.trim() || !chat.outputText.trim())
       return
-    let apiKey = ''
-    try {
-      apiKey = String(JSON.parse(localStorage.getItem('settings/providers/configured') ?? '{}')?.['openrouter-ai']?.config?.apiKey ?? '')
-    }
-    catch {}
-    void learnFromTurn(userText, chat.outputText, apiKey)
+    void learnFromTurn(userText, chat.outputText)
   })
 
   // One request owns preparation and generation. Cancellation cannot miss asynchronous startup.
