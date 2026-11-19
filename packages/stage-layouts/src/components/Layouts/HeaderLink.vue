@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { useTheme } from '@proj-airi/ui'
 import { RouterLink } from 'vue-router'
 
-import LogoDark from '../../assets/logo-dark.svg'
-import Logo from '../../assets/logo.svg'
-
-const { isDark: dark } = useTheme()
+// Hinata's logo, served from the web app's public folder.
+const hinataLogo = `${import.meta.env.BASE_URL}favicon.svg`
 </script>
 
 <template>
@@ -13,14 +10,9 @@ const { isDark: dark } = useTheme()
     to="/" flex="~"
     w-max items-center gap-2 px-2 text-nowrap text-2xl outline-none
   >
-    <template v-if="dark">
-      <img :src="LogoDark" h-8 w-8 class="theme-colored">
-    </template>
-    <template v-else>
-      <img :src="Logo" h-8 w-8 class="theme-colored">
-    </template>
+    <img :src="hinataLogo" alt="" h-8 w-8 rounded-lg>
     <div translate-y="[2px]" font-quicksand font-semibold>
-      <span>AIRI</span>
+      <span>Hinata</span>
     </div>
   </RouterLink>
 </template>

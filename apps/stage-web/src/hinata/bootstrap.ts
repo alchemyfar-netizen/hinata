@@ -52,6 +52,7 @@ export async function hinataBootstrap() {
 
   applySettings(state)
   markSetupDone()
+  useHinataLook()
 
   hinataMemory.userName = state?.userName ?? null
   hinataMemory.facts = state?.facts ?? []
@@ -114,6 +115,34 @@ function markSetupDone() {
   for (const id of ['welcome', 'provider-selection', 'provider-configuration', 'model-selection', 'permissions'])
     steps[id] ??= { version: 1, outcome: 'done', at }
   localStorage.setItem('onboarding/steps', JSON.stringify(steps))
+}
+
+const HINATA_AVATAR_REF = { id: 'hinata-vrm-avatar-model', displayModelId: 'preset-vrm-hinata', type: 'vrm', config: {} }
+const LAVENDER_HUE = '305'
+
+/**
+ * Hinata's avatar and colors on every device. A browser that opened older versions keeps AIRI's model on its
+ * saved character and AIRI's color, so both are corrected here; a different avatar picked later in Settings stays.
+ */
+function useHinataLook() {
+  try {
+    const raw = localStorage.getItem('airi-cards')
+    const cards = raw ? JSON.parse(raw) as [string, any][] : []
+    const entry = cards.find(([id]) => id === 'default')
+    const airi = entry?.[1]?.extensions?.airi
+    if (airi && localStorage.getItem('hinata/look-version') !== '1') {
+      airi.avatarModels = [HINATA_AVATAR_REF, ...(airi.avatarModels ?? []).filter((model: { id: string }) => model.id !== HINATA_AVATAR_REF.id)]
+      airi.defaultAvatarModelId = HINATA_AVATAR_REF.id
+      localStorage.setItem('airi-cards', JSON.stringify(cards))
+    }
+    const hue = localStorage.getItem('settings/theme/colors/hue')
+    if (hue === null || hue === '220.44' || hue === '275')
+      localStorage.setItem('settings/theme/colors/hue', LAVENDER_HUE)
+    localStorage.setItem('hinata/look-version', '1')
+  }
+  catch (error) {
+    console.warn('[hinata] could not apply the Hinata look', error)
+  }
 }
 
 // ---------------- avatar ----------------
