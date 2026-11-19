@@ -9,6 +9,7 @@ import {
   loadProfile,
   recentMessages,
   saveProfile,
+  sendLoginLink,
   setPassword,
   signInWithPassword,
   validSession,
@@ -184,6 +185,7 @@ function showLoginScreen(error?: string): Promise<void> {
       <input name="password" type="password" autocomplete="current-password" placeholder="Password" required>
       <button type="submit">Sign in</button>
       <div class="error" role="alert"></div>
+      <div class="note"><a href="#" data-forgot style="color:#cbb8ff">Forgot password? Email me a sign-in link</a></div>
       <div class="note">Your memories stay private to your account.</div>
     `)
     const form = gate.querySelector('form')!
@@ -193,6 +195,22 @@ function showLoginScreen(error?: string): Promise<void> {
     const password = gate.querySelector<HTMLInputElement>('input[name="password"]')!
     errorBox.textContent = error ?? ''
     email.focus()
+
+    gate.querySelector('[data-forgot]')!.addEventListener('click', async (event) => {
+      event.preventDefault()
+      if (!/^\S+@\S+\.\S+$/.test(email.value.trim())) {
+        errorBox.textContent = 'Type your email first, then tap the link again.'
+        return
+      }
+      errorBox.textContent = ''
+      try {
+        await sendLoginLink(email.value.trim(), location.origin + import.meta.env.BASE_URL)
+        errorBox.textContent = 'Sent! Open the link in the email on this device, then set a new password.'
+      }
+      catch (sendError) {
+        errorBox.textContent = sendError instanceof Error ? sendError.message : 'Could not send the link.'
+      }
+    })
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault()

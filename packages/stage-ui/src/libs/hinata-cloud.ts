@@ -121,7 +121,7 @@ export async function setPassword(password: string) {
 
 /** Emails a sign-in link that comes back to this app. */
 export async function sendLoginLink(email: string, redirectTo: string) {
-  await authFetch(`otp?redirect_to=${encodeURIComponent(redirectTo)}`, { email, create_user: true })
+  await authFetch(`otp?redirect_to=${encodeURIComponent(redirectTo)}`, { email, create_user: false })
 }
 
 /**
@@ -157,6 +157,16 @@ export async function consumeLoginRedirect(): Promise<{ signedIn: boolean, error
 
 let refreshing: Promise<HinataSession | null> | undefined
 
+/**
+ * One refresh at a time across all tabs. Supabase rotates the refresh token, so two tabs
+ * refreshing with the same token would make the second one fail and sign the user out.
+ */
+function withRefreshLock<T>(task: () => Promise<T>): Promise<T> {
+  if (typeof navigator !== 'undefined' && navigator.locks)
+    return navigator.locks.request('hinata-session-refresh', task)
+  return task()
+}
+
 /** A session whose access token is valid for at least another minute, or null when signed out. */
 export async function validSession(): Promise<HinataSession | null> {
   const session = readSession()
@@ -165,24 +175,34 @@ export async function validSession(): Promise<HinataSession | null> {
   if (session.expires_at - 60 > Date.now() / 1000)
     return session
 
-  refreshing ??= (async () => {
+  refreshing ??= withRefreshLock(async () => {
+    // Another tab may have refreshed while this one waited for the lock: its session is in storage.
+    const latest = readSession()
+    if (!latest)
+      return null
+    if (latest.expires_at - 60 > Date.now() / 1000)
+      return latest
     try {
-      const data = await authFetch('token?grant_type=refresh_token', { refresh_token: session.refresh_token })
+      const data = await authFetch('token?grant_type=refresh_token', { refresh_token: latest.refresh_token })
       const next = sessionFrom(data)
       writeSession(next)
       return next
     }
     catch (error) {
-      // Offline keeps the old session for the next try; a rejected refresh token signs out.
+      // Offline: keep the session for the next try.
       if (error instanceof TypeError)
         return null
-      writeSession(null)
+      // A tab that refreshed with the same token in the meantime already stored the new session.
+      const now = readSession()
+      if (now && now.refresh_token !== latest.refresh_token)
+        return now
+      if (/refresh token/i.test(error instanceof Error ? error.message : ''))
+        writeSession(null)
       return null
     }
-    finally {
-      refreshing = undefined
-    }
-  })()
+  }).finally(() => {
+    refreshing = undefined
+  })
   return refreshing
 }
 
